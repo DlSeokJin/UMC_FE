@@ -1,6 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { getMe } from "@/api/members/me";
+import { useAuthStore } from "@/stores/auth-store";
 
 export function Header() {
+  const accessToken = useAuthStore((state) => state.accessToken);
+
+  const meQuery = useQuery({
+    queryKey: ["members", "me"],
+    queryFn: getMe,
+    enabled: Boolean(accessToken),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
       <div className="max-w-[1300px] h-16 mx-auto px-6 md:px-12 flex items-center justify-between">
@@ -30,17 +43,19 @@ export function Header() {
             >
               검색
             </Link>
-            <button
-              type="button"
-              className="text-slate-500 hover:text-slate-800 py-1.5 transition-colors cursor-pointer"
+            <Link
+              to="/mypage"
+              activeProps={{ className: "font-bold text-slate-900" }}
+              inactiveProps={{ className: "text-slate-500 hover:text-slate-800" }}
+              className="py-1.5 transition-colors"
             >
               내 정보
-            </button>
+            </Link>
           </nav>
         </div>
 
-        {/* 우측: 검색 아이콘 및 로그인 버튼 */}
-        <div className="flex items-center gap-4">
+        {/* 우측: 검색 아이콘 및 로그인/마이페이지 버튼 */}
+        <div className="flex items-center gap-3">
           <Link
             to="/search"
             className="p-1 text-slate-500 hover:text-slate-800 transition-colors"
@@ -60,12 +75,31 @@ export function Header() {
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </Link>
-          <button
-            type="button"
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer"
-          >
-            로그인
-          </button>
+          {!accessToken && (
+            <Link
+              to="/signup"
+              className="border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-md px-3.5 py-2 text-sm font-semibold transition-colors"
+            >
+              회원가입
+            </Link>
+          )}
+          {!accessToken ? (
+            <Link
+              to="/login"
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer"
+            >
+              로그인
+            </Link>
+          ) : meQuery.isLoading ? (
+            <span className="h-10 w-24 animate-pulse rounded-lg bg-gray-200" />
+          ) : (
+            <Link
+              to="/mypage"
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer"
+            >
+              마이페이지
+            </Link>
+          )}
         </div>
       </div>
     </header>

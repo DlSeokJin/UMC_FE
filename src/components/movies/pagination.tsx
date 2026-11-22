@@ -3,13 +3,16 @@ import { cn } from "../../utils/cn";
 interface PaginationProps {
   currentPage?: number;
   totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export default function Pagination({
   currentPage = 1,
   totalPages = 5,
+  onPageChange,
 }: PaginationProps) {
-  const pages = Array.from({ length: totalPages }, (_, idx) => idx + 1);
+  const maxVisiblePages = Math.min(totalPages, 5);
+  const pages = Array.from({ length: maxVisiblePages }, (_, idx) => idx + 1);
 
   return (
     <nav className="flex justify-center gap-2" aria-label="페이지 네비게이션">
@@ -17,6 +20,7 @@ export default function Pagination({
         <button
           key={page}
           type="button"
+          onClick={() => onPageChange?.(page)}
           className={cn(
             "w-9 h-9 rounded-md border text-sm font-semibold cursor-pointer transition-colors flex items-center justify-center",
             page === currentPage
